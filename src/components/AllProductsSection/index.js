@@ -70,6 +70,10 @@ class AllProductsSection extends Component {
     productsList: [],
     isLoading: false,
     activeOptionId: sortbyOptions[0].optionId,
+    searchInputValue: '',
+    ratingId: '',
+    category: '',
+    productsFailure: false,
   }
 
   componentDidMount() {
@@ -84,8 +88,8 @@ class AllProductsSection extends Component {
 
     // TODO: Update the code to get products with filters applied
 
-    const {activeOptionId} = this.state
-    const apiUrl = `https://apis.ccbp.in/products?sort_by=${activeOptionId}`
+    const {activeOptionId, searchInputValue, ratingId, category} = this.state
+    const apiUrl = `https://apis.ccbp.in/products?sort_by=${activeOptionId}&title_search=${searchInputValue}&rating=${ratingId}&category=${category}`
     const options = {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
@@ -107,6 +111,8 @@ class AllProductsSection extends Component {
         productsList: updatedData,
         isLoading: false,
       })
+    } else {
+      this.setState({productsFailure: true, isLoading: false})
     }
   }
 
@@ -115,7 +121,7 @@ class AllProductsSection extends Component {
   }
 
   renderProductsList = () => {
-    const {productsList, activeOptionId} = this.state
+    const {productsList} = this.state
 
     // TODO: Add No Products View
     return (
@@ -131,20 +137,74 @@ class AllProductsSection extends Component {
     )
   }
 
+  onChangeSearch = searchValue => {
+    this.setState(
+      {searchInputValue: searchValue, isLoading: false},
+      this.getProducts,
+    )
+  }
+
+  onClickRating = ratingId => {
+    this.setState({ratingId, isLoading: false}, this.getProducts)
+  }
+
+  onClickCategory = name => {
+    this.setState({category: name, isLoading: false}, this.getProducts)
+  }
+
+  onClearFilters = () => {
+    this.setState(
+      {
+        searchInputValue: '',
+        ratingId: '',
+        category: '',
+        isLoading: false,
+      },
+      this.getProducts,
+    )
+  }
+
   renderLoader = () => (
     <div className="products-loader-container">
       <Loader type="ThreeDots" color="#0b69ff" height="50" width="50" />
     </div>
   )
 
+  renderNoItemsView = () => (
+    <div>
+      <img
+        src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-no-products-view.png"
+        alt="no products"
+      />
+      <h1>No Products Found</h1>
+    </div>
+  )
+
+  renderFailureView = () => (
+    <div>
+      <img
+        src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-products-error-view.png"
+        alt="products failure"
+      />
+      <h1>Oops! Something went Wrong </h1>
+    </div>
+  )
+
   // TODO: Add failure view
 
   render() {
-    const {isLoading, activeOptionId} = this.state
+    const {
+      isLoading,
+      activeOptionId,
+      productsList,
+      productsFailure,
+    } = this.state
+    const showNoItems = productsList.length < 1
 
     return (
       <>
         <ProductsHeader
+          onChangeSearch={this.onChangeSearch}
           activeOptionId={activeOptionId}
           sortbyOptions={sortbyOptions}
           changeSortby={this.changeSortby}
@@ -152,10 +212,27 @@ class AllProductsSection extends Component {
         <div className="all-products-section">
           {/* TODO: Update the below element */}
           <FiltersGroup
+            clearFilters={this.onClearFilters}
+            takingCategoryName={this.onClickCategory}
+            takingRatingId={this.onClickRating}
             categoryOptions={categoryOptions}
             ratingsList={ratingsList}
           />
-          {isLoading ? this.renderLoader() : this.renderProductsList()}
+          {isLoading ? (
+            this.renderLoader()
+          ) : (
+            <>
+              {productsFailure ? (
+                this.renderFailureView()
+              ) : (
+                <>
+                  {showNoItems
+                    ? this.renderNoItemsView()
+                    : this.renderProductsList()}
+                </>
+              )}
+            </>
+          )}
         </div>
       </>
     )

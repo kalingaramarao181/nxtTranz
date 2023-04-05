@@ -9,12 +9,21 @@ const ProductsHeader = props => {
     changeSortby(event.target.value)
   }
 
-  const {sortbyOptions, activeOptionId} = props
+  const {sortbyOptions, activeOptionId, onChangeSearch} = props
+
+  const onChangeBySearch = event => {
+    onChangeSearch(event.target.value)
+  }
 
   return (
     <div className="products-header">
       <div className="search-input-container">
-        <input placeholder="Search" className="search-input" type="search" />
+        <input
+          onChange={onChangeBySearch}
+          placeholder="Search"
+          className="search-input"
+          type="search"
+        />
         <FiSearch className="search-icon" />
       </div>
       <h1 className="products-list-heading">All Products</h1>

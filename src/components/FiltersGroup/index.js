@@ -1,32 +1,55 @@
+import Category from '../Category'
+import Rating from '../Rating'
+
 import './index.css'
 
 const FiltersGroup = props => {
-  const {categoryOptions, ratingsList} = props
+  const {
+    categoryOptions,
+    ratingsList,
+    takingRatingId,
+    takingCategoryName,
+    clearFilters,
+  } = props
 
+  const onClickRating = ratingId => {
+    takingRatingId(ratingId)
+  }
+
+  const onClickCategory = name => {
+    takingCategoryName(name)
+  }
+
+  const onClickClearFilters = () => {
+    clearFilters()
+  }
   return (
     <div className="filters-group-container">
       <h1 className="category-heading">Category</h1>
-      <ul className="category-item-container">
+      <div className="category-item-container">
         {categoryOptions.map(each => (
-          <li className="category-item">
-            <button className="item-button" type="button">
-              {each.name}
-            </button>
-          </li>
+          <Category
+            key={each.categoryId}
+            categoryDetails={each}
+            passingCategoryName={onClickCategory}
+          />
         ))}
-      </ul>
+      </div>
       <h1 className="category-heading">Ratings</h1>
       <ul className="category-item-container">
         {ratingsList.map(each => (
-          <li className="category-item">
-            <button className="rating-item-button" type="button">
-              <img className="rating-image" src={each.imageUrl} alt="rating" />
-              <p>&& up</p>
-            </button>
-          </li>
+          <Rating
+            key={each.ratingId}
+            ratingDetails={each}
+            passRatingId={onClickRating}
+          />
         ))}
       </ul>
-      <button type="button" className="clear-filters-button">
+      <button
+        onClick={onClickClearFilters}
+        type="button"
+        className="clear-filters-button"
+      >
         Clear Filters
       </button>
     </div>
